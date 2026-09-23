@@ -29,7 +29,7 @@ The 300 homes recommended for sale are those where the model says the market is 
 | Individual home identifier | Yes | `bbl_id` (sales), `bbl_id`/`property_id` (portfolio) | Portfolio has 1,000 unique bbl_ids |
 | Structural features per home | Yes, via join | `land_sqft`, `tot_sqft`, `yr_built`, `res_unit`, `com_unit`, `tot_unit` (sales only) | Portfolio.csv itself has no structural columns — must join to sales data |
 | Amenity-proximity features | Yes, via join | 30 columns: `park`, `cafe`, `train_station`, `school`, `restaurant`, etc. (sales only) | Same join dependency |
-| Portfolio linkable to sales records | Yes | `bbl_id` + `price` match | 1,000/1,000 portfolio bbl_ids found in sales data; exact acquisition record identified by bbl_id + acquired_price match (sale_date is 2 days after acquired_date for 1000/1002 candidate matches — likely contract vs. closing date). 2 edge-case rows have large date offsets — a duplicate/dedup rule is needed in Stage 2. |
+| Portfolio linkable to sales records | Yes | `bbl_id` + `price` match, tie-broken by nearest date | 1,000/1,000 portfolio bbl_ids found in sales data; acquisition record identified by bbl_id + acquired_price match, tie-broken by nearest sale_date to acquired_date. Confirmed this resolves all 1,000 uniquely, each at exactly +2 days (contract vs. closing date) — see "Follow-up" below. |
 | Macro/time controls | Yes | `Unemployment_rate`, `Mortgage_rate`, `gdp`, `real_estate_output`, `days_since_lehman_brothers`, `days_since_hurricane_sandy`, `days_since_start_datset`, `year`, `quarter` | Lets the model separate amenity effects from crisis/recovery timing |
 | Rental income | Yes | `monthly_rent` (portfolio only) | Not used for the main question; noted as a limitation |
 
@@ -56,8 +56,11 @@ The 300 homes recommended for sale are those where the model says the market is 
 - Figures: `outputs/figures/01_tour_01..13*.png`, scripts `src/01_profile.py`, `src/explore/portfolio_map.py`.
 - Portfolio map (added at analyst's request): all 1,000 homes matched a location via `bbl_id` join; 54 of 57 market neighborhoods represented. Top-priced clusters: Todt Hill ($965K median, n=3), Richmondtown ($690K, n=3), Emerson Hill ($680K, n=3) — small pockets of very high-value homes alongside larger mid-price clusters like Tottenville (n=50, $605K median).
 
+## Follow-up: the 2 date-offset outliers, resolved
+Investigated the 2 candidate matches with anomalous date offsets (bbl_id 5447370 and 578310, script `src/explore/date_offset_outliers.py`). Not a data-quality issue: both properties sold twice at the exact same price (a coincidental earlier resale), so a naive bbl_id+price join returns two rows. In both cases the correct record — the one 2 days after `acquired_date`, matching the pattern of all other 1,000 homes — exists and is unambiguous once you break ties by nearest date. **Verified**: bbl_id + price match, tie-broken by nearest `sale_date` to `acquired_date`, resolves all `1,000 / 1,000` portfolio properties uniquely, all at the expected +2 day offset. This is the confirmed join rule for Stage 2.
+
 ## Open risks
-- Portfolio.csv carries no structural/amenity features of its own — the whole analysis depends on a clean join to the sales data via `bbl_id` + price match. 2 of 1,000 candidate matches have anomalous date offsets and need a dedup rule (Stage 2).
+- Portfolio.csv carries no structural/amenity features of its own — the whole analysis depends on a clean join to the sales data via `bbl_id` + price match, tie-broken by nearest date (confirmed above; to be implemented as a transformation in Stage 2).
 - 287 portfolio bbl_ids appear more than once in the sales data (repeat sales of the same property over 11 years) — need a rule for which sale record supplies the "acquisition" structural/amenity snapshot vs. which supply price history.
 - Rental income (`monthly_rent`) is out of scope for the main question but could matter to the board's actual decision — flagged as the likely "honest limitation" for Stage 5.
 - The model's amenity coefficients are correlational, not causal — a home near a park may differ in other unobserved ways (this is the refutation/rival-explanations work for Stage 4).
