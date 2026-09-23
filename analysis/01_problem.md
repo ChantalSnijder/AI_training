@@ -34,7 +34,7 @@ The 300 homes recommended for sale are those where the model says the market is 
 | Rental income | Yes | `monthly_rent` (portfolio only) | Not used for the main question; noted as a limitation |
 
 ## Data tour
-12 figures built in `outputs/figures/01_tour_*.png`, script `src/01_profile.py`:
+13 figures built in `outputs/figures/01_tour_*.png`, scripts `src/01_profile.py` (1-12), `src/explore/portfolio_map.py` (13):
 
 1. **Data completeness** — only `price` has any nulls (0.03%). This raises: negligible missingness risk for the main model.
 2. **Volume & price over time** — monthly sales counts and median price, 2003–2013. This raises: how sharply did the 2008 crisis show up, and did it recover?
@@ -48,11 +48,13 @@ The 300 homes recommended for sale are those where the model says the market is 
 10. **Portfolio acquisition price distribution** — median $410K, total $435M paid. This raises: how does the acquisition-price distribution compare to the market's overall price distribution?
 11. **Median price by year with 2008 crisis marked**. This raises: how much of any "premium" is really just crisis-era mispricing that has since corrected?
 12. **Portfolio price distribution detail**. This raises: which homes, by acquisition price alone (before any modeling), look like outliers?
+13. **Portfolio map by acquisition price** (`src/explore/portfolio_map.py`, added at analyst's request) — all 1,000 homes plotted by lat/long, colored by acquisition price. 54 of the market's 57 neighborhoods are represented. This raises: are the highest/lowest-priced homes geographically clustered, or mixed within neighborhoods?
 
 ## Profile summary
 - Sales data: 47,901 rows, 60 columns, 2003-01-04 to 2014-01-02, median price $388,000, 57 neighborhoods, only `price` has nulls (0.03%).
 - Portfolio data: 1,000 rows, 5 columns, acquired 2005-2013, median acquisition price $410,000, total paid $435,147,572.
-- Figures: `outputs/figures/01_tour_01..12*.png`, script `src/01_profile.py`.
+- Figures: `outputs/figures/01_tour_01..13*.png`, scripts `src/01_profile.py`, `src/explore/portfolio_map.py`.
+- Portfolio map (added at analyst's request): all 1,000 homes matched a location via `bbl_id` join; 54 of 57 market neighborhoods represented. Top-priced clusters: Todt Hill ($965K median, n=3), Richmondtown ($690K, n=3), Emerson Hill ($680K, n=3) — small pockets of very high-value homes alongside larger mid-price clusters like Tottenville (n=50, $605K median).
 
 ## Open risks
 - Portfolio.csv carries no structural/amenity features of its own — the whole analysis depends on a clean join to the sales data via `bbl_id` + price match. 2 of 1,000 candidate matches have anomalous date offsets and need a dedup rule (Stage 2).

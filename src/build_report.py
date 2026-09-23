@@ -25,6 +25,7 @@ TOUR_FIGURES = [
     ("01_tour_10_portfolio_prices.png", "Portfolio acquisition prices", "Median $410K, total $435M paid. This raises: how does this compare to the market's overall price distribution?"),
     ("01_tour_11_market_crisis.png", "2008 crisis impact", "Median price by year, crisis period marked. This raises: how much of any premium is crisis-era mispricing that has since corrected?"),
     ("01_tour_12_portfolio_distribution.png", "Portfolio price distribution detail", "This raises: which homes, by acquisition price alone, look like outliers before any modeling?"),
+    ("01_tour_13_portfolio_map.png", "Portfolio map by acquisition price", "All 1,000 homes by lat/long, colored by acquisition price. This raises: are the highest/lowest-priced homes geographically clustered, or mixed within neighborhoods?"),
 ]
 
 STAGE_FILES = [
